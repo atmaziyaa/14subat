@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>En Kıymetlime... ❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Great+Vibes&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        /* --- ANA AYARLAR --- */
+        body {
+            margin: 0; padding: 0; overflow: hidden;
+            background: radial-gradient(circle at center, #2a0a12 0%, #000000 100%);
+            font-family: 'Montserrat', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; color: white;
+        }
+
+        /* --- KATMANLAR --- */
+        #bgCanvas { position: absolute; top: 0; left: 0; z-index: 1; opacity: 0; transition: opacity 3s ease; }
+        #mainCanvas { position: absolute; top: 0; left: 0; z-index: 5; opacity: 0; transition: opacity 3s ease; }
+        
+        /* --- BÖLÜM 1: GİRİŞ --- */
+        #intro-container {
+            position: absolute; z-index: 20;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            width: 100%; height: 100%; transition: all 2s ease-in-out;
+        }
+        .intro-text {
+            font-family: 'Great Vibes', cursive; font-size: 4rem; color: #ff0055;
+            text-shadow: 0 0 15px rgba(255, 0, 85, 0.8);
+            opacity: 0; transform: translateY(20px); transition: all 2s ease;
+            margin-bottom: -50px; z-index: 21;
+        }
+        .rose-svg {
+            width: 450px; height: 450px; filter: drop-shadow(0 0 20px #ff0055);
+            animation: breathe 4s ease-in-out infinite alternate;
+        }
+        .rose-path {
+            fill: none; stroke: #ff0055; stroke-width: 2.5;
+            stroke-dasharray: 2000; stroke-dashoffset: 2000;
+            stroke-linecap: round; animation: drawRose 5s ease-in-out forwards;
+        }
+        @keyframes drawRose { to { stroke-dashoffset: 0; } }
+        @keyframes breathe { from { transform: scale(1); } to { transform: scale(1.08); } }
+
+        /* Ateş Böcekleri */
+        .firefly-intro {
+            position: absolute; width: 4px; height: 4px; background: #ffeb3b; border-radius: 50%;
+            box-shadow: 0 0 10px #ffeb3b; animation: flyAround 8s infinite linear;
+        }
+        @keyframes flyAround {
+            0% { transform: rotate(0deg) translateX(250px) rotate(0deg); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: rotate(360deg) translateX(250px) rotate(-360deg); opacity: 0; }
+        }
+
+        /* --- MERKEZ YAZI --- */
+        #heart-text {
+            position: absolute; z-index: 15; font-family: 'Great Vibes', cursive;
+            font-size: 4rem; color: #fff; text-shadow: 0 0 20px #ff0055, 0 0 40px #ff0055;
+            opacity: 0; transition: opacity 2s ease; pointer-events: none; text-align: center;
+        }
+
+        /* --- FOTOĞRAF GALERİSİ (YENİ EKLENDİ) --- */
+        #photo-gallery {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 40; /* Mektubun altında kalsın ama kalbin üstünde */
+            pointer-events: none; /* Tıklamayı engelleme */
+        }
+        .polaroid {
+            position: absolute; background: white; padding: 10px 10px 35px 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            width: 160px; /* Fotoğraf boyutu */
+            opacity: 0;
+            transform: scale(0.5) rotate(0deg); /* Başlangıçta küçük */
+            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .polaroid img {
+            width: 100%; height: auto; display: block; border: 1px solid #eee;
+        }
+
+        /* --- MEKTUP --- */
+        #letter-section {
+            display: none; position: absolute; z-index: 50;
+            flex-direction: column; align-items: center; opacity: 0; transition: opacity 2s ease;
+        }
+        .title {
+            font-family: 'Cinzel Decorative', cursive; font-size: 3rem;
+            background: linear-gradient(to right, #ff758c, #ff7eb3, #f7d75c);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 3rem; text-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .envelope-wrapper {
+            position: relative; width: 350px; height: 240px; cursor: pointer; perspective: 1000px;
+        }
+        .envelope {
+            position: relative; width: 100%; height: 100%;
+            transform-style: preserve-3d; transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .envelope-wrapper.open .envelope { transform: rotateX(180deg); }
+        .front-face, .back-face {
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+            border-radius: 10px; box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+        }
+        .front-face {
+            background: linear-gradient(135deg, #5e0a26, #8a1238);
+            display: flex; justify-content: center; align-items: center; z-index: 2; border: 1px solid #b31b4d;
+        }
+        .front-face::after {
+            content: ''; position: absolute; top: 0;
+            border-left: 175px solid transparent; border-right: 175px solid transparent;
+            border-top: 120px solid #a61745;
+        }
+        .wax-seal {
+            width: 64px; height: 64px; background: linear-gradient(45deg, #d4af37, #f7d75c);
+            border-radius: 50%; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 10; margin-top: -50px; display: flex; justify-content: center; align-items: center;
+            font-size: 30px; color: #5e0a26;
+        }
+        .back-face {
+            background: #fffafc; transform: rotateX(180deg); padding: 30px;
+            box-sizing: border-box; color: #333; display: flex; justify-content: center; align-items: center; text-align: center;
+        }
+        #typewriter-text { font-size: 1.2rem; line-height: 1.6; font-weight: 500; white-space: pre-wrap; font-family: 'Montserrat', sans-serif;}
+
+        /* --- OVERLAY --- */
+        #start-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050103; z-index: 999;
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+            color: rgba(255,255,255,0.8); cursor: pointer; transition: opacity 1s;
+        }
+        .tap-icon { font-size: 2.5rem; animation: pulse 2s infinite; margin-bottom: 15px; color: #ff0055;}
+        @keyframes pulse { 0% { transform: scale(0.9); opacity: 0.5;} 50% { transform: scale(1.1); opacity: 1;} 100% { transform: scale(0.9); opacity: 0.5;} }
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" loop>
+        <source src="sarki.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="start-overlay">
+        <div class="tap-icon">❤️</div>
+        <div style="letter-spacing: 2px;">BAŞLATMAK İÇİN DOKUN</div>
+    </div>
+
+    <div id="intro-container">
+        <div class="intro-text" id="intro-text-element">Bu çiçek Nehir'ime...</div>
+        <svg class="rose-svg" viewBox="0 0 500 500">
+            <path class="rose-path" d="M250,200 C230,200 220,220 230,230 C240,240 260,220 250,200 M250,200 C270,180 290,200 280,220 C270,240 230,240 220,220 M250,250 C200,250 180,180 250,150 C320,180 300,250 250,250 M250,250 L250,400 M250,300 L200,280 M250,330 L300,310 M200,280 C180,260 180,290 200,300 M300,310 C320,290 320,320 300,330"/>
+        </svg>
+    </div>
+
+    <canvas id="bgCanvas"></canvas> 
+    <canvas id="mainCanvas"></canvas> 
+    
+    <div id="heart-text">Seni Çok Seviyorum</div>
+
+    <div id="photo-gallery"></div>
+
+    <div id="letter-section">
+        <div class="title">En Kıymetlime...</div>
+        <div class="envelope-wrapper" id="envelopeBtn">
+            <div class="envelope">
+                <div class="front-face">
+                    <div class="wax-seal">⚖️</div>
+                </div>
+                <div class="back-face">
+                    <div id="typewriter-text"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- AYARLAR ---
+        const myMessage = `Seninle geçen her an, 
+evrenin bana sunduğu en güzel hediye.
+Gözlerindeki ışık hiç sönmesin.
+
+Seni çok seviyorum. ❤️`;
+
+        // FOTOĞRAF LİSTESİ (İsimleri buraya yazdım)
+        // Dosyalarının adlarının foto1, foto2... olduğundan emin ol.
+        const myPhotos = [
+            "foto1.jpg",
+            "foto2.jpg",
+            "foto3.jpg",
+            "foto4.jpg"
+        ];
+
+
+        // --- SİSTEM ---
+        const overlay = document.getElementById('start-overlay');
+        const audio = document.getElementById('bg-music');
+        const introContainer = document.getElementById('intro-container');
+        const introText = document.getElementById('intro-text-element');
+        const heartText = document.getElementById('heart-text');
+        
+        let audioStarted = false;
+
+        for(let i=0; i<20; i++) {
+            let fly = document.createElement('div');
+            fly.classList.add('firefly-intro');
+            fly.style.animationDelay = Math.random() * -5 + 's';
+            fly.style.transformOrigin = `${(Math.random()-0.5)*100}px ${(Math.random()-0.5)*100}px`;
+            introContainer.appendChild(fly);
+        }
+
+        overlay.addEventListener('click', () => {
+            if(audioStarted) return;
+            audioStarted = true;
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.style.display = 'none', 1000);
+            
+            audio.volume = 0.6;
+            audio.play().catch(e => console.log("Ses hatası:", e));
+
+            setTimeout(() => { introText.style.opacity = '1'; introText.style.transform = 'translateY(0)'; }, 500);
+
+            setTimeout(() => {
+                introContainer.style.opacity = '0'; introContainer.style.transform = 'scale(1.2)';
+                document.getElementById('bgCanvas').style.opacity = '1';
+                document.getElementById('mainCanvas').style.opacity = '1';
+                initBgPetals(); initMainHeart();
+                setTimeout(() => introContainer.style.display = 'none', 2000);
+            }, 6500);
+
+            setTimeout(() => { heartText.style.opacity = '1'; }, 8000);
+
+            setTimeout(transitionToLetter, 17000);
+        });
+
+        // --- FOTOĞRAF GÖSTERME FONKSİYONU ---
+        function dropPhotos() {
+            const gallery = document.getElementById('photo-gallery');
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            myPhotos.forEach((src, index) => {
+                const imgContainer = document.createElement('div');
+                imgContainer.classList.add('polaroid');
+                
+                // Rastgele Konumlar (Ekranın sağına soluna dağılsın)
+                // İlk iki foto solda, son iki foto sağda olsun ki mektubu kapatmasın
+                let randomX;
+                if(index % 2 === 0) {
+                     randomX = Math.random() * (width * 0.25) + 50; // Sol taraf
+                } else {
+                     randomX = width - (Math.random() * (width * 0.25) + 50) - 160; // Sağ taraf
+                }
+                
+                const randomY = Math.random() * (height * 0.6) + (height * 0.1);
+                const randomRot = (Math.random() - 0.5) * 40; // Yamuk dursun
+
+                imgContainer.style.left = `${randomX}px`;
+                imgContainer.style.top = `${randomY}px`;
+                
+                const img = document.createElement('img');
+                img.src = src;
+                
+                // Hata kontrolü (Resim yüklenemezse konsola yaz)
+                img.onerror = function() { console.log("Resim bulunamadı: " + src); };
+
+                imgContainer.appendChild(img);
+                gallery.appendChild(imgContainer);
+
+                // Sırayla düşsünler
+                setTimeout(() => {
+                    imgContainer.style.opacity = '1';
+                    imgContainer.style.transform = `scale(1) rotate(${randomRot}deg)`;
+                }, index * 600);
+            });
+        }
+
+
+        // --- CANVAS KODLARI (Aynı kaldı) ---
+        const bgCanvas = document.getElementById('bgCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        let petals = [];
+        function initBgPetals() {
+            bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight;
+            for(let i=0; i<60; i++) petals.push(new Petal()); animateBg();
+        }
+        class Petal {
+            constructor() {
+                this.x = Math.random() * bgCanvas.width; this.y = Math.random() * bgCanvas.height - bgCanvas.height;
+                this.size = Math.random() * 12 + 5; this.speedY = Math.random() * 1.5 + 0.5; this.speedX = (Math.random() - 0.5) * 0.8;
+                this.rotation = Math.random() * 360; this.rotationSpeed = (Math.random() - 0.5) * 2;
+                this.color = `rgba(${160 + Math.random()*80}, 0, ${40 + Math.random()*40}, ${0.3 + Math.random()*0.4})`;
+            }
+            update() {
+                this.y += this.speedY; this.x += this.speedX + Math.sin(this.y * 0.005) * 0.5;
+                this.rotation += this.rotationSpeed; if (this.y > bgCanvas.height + this.size) this.y = -this.size;
+            }
+            draw() {
+                bgCtx.save(); bgCtx.translate(this.x, this.y); bgCtx.rotate(this.rotation * Math.PI / 180);
+                bgCtx.fillStyle = this.color; bgCtx.beginPath(); bgCtx.moveTo(0, -this.size/2);
+                bgCtx.quadraticCurveTo(this.size/2, 0, 0, this.size/2); bgCtx.quadraticCurveTo(-this.size/2, 0, 0, -this.size/2);
+                bgCtx.fill(); bgCtx.restore();
+            }
+        }
+        function animateBg() { requestAnimationFrame(animateBg); bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height); petals.forEach(p => { p.update(); p.draw(); }); }
+
+        const mainCanvas = document.getElementById('mainCanvas');
+        const ctx = mainCanvas.getContext('2d');
+        let heartParticles = []; let mouse = { x: -500, y: -500 }; let mainAnimationId;
+        function initMainHeart() {
+            mainCanvas.width = window.innerWidth; mainCanvas.height = window.innerHeight;
+            for(let i=0; i<2000; i++) heartParticles.push(new HeartParticle()); animateMain();
+        }
+        window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+        window.addEventListener('resize', () => { mainCanvas.width = window.innerWidth; bgCanvas.width = window.innerWidth; mainCanvas.height = window.innerHeight; bgCanvas.height = window.innerHeight; });
+        class HeartParticle {
+            constructor() {
+                this.x = Math.random() * mainCanvas.width; this.y = Math.random() * mainCanvas.height;
+                this.baseT = Math.random() * Math.PI * 2; this.vx = (Math.random() - 0.5) * 2; this.vy = (Math.random() - 0.5) * 2;
+                this.size = Math.random() * 2 + 0.5; const hue = Math.random() > 0.6 ? (340 + Math.random()*20) : (40 + Math.random()*20);
+                this.color = `hsla(${hue}, 80%, 55%, ${0.5 + Math.random()*0.5})`; this.noiseOffset = Math.random() * 1000;
+            }
+            update(time) {
+                const beat = 1 + 0.08 * Math.pow(Math.sin(time * 0.002), 3);
+                let hx = 16 * Math.pow(Math.sin(this.baseT), 3); let hy = 13 * Math.cos(this.baseT) - 5 * Math.cos(2*this.baseT) - 2 * Math.cos(3*this.baseT) - Math.cos(4*this.baseT);
+                const scale = (Math.min(mainCanvas.width, mainCanvas.height) / 35) * beat;
+                const targetX = (mainCanvas.width / 2) + (hx * scale); const targetY = (mainCanvas.height / 2) - (hy * scale);
+                let dx = targetX - this.x; let dy = targetY - this.y; this.vx += dx * 0.005; this.vy += dy * 0.005;
+                let mdx = mouse.x - this.x; let mdy = mouse.y - this.y; let mDist = Math.sqrt(mdx*mdx + mdy*mdy);
+                if(mDist < 150) {
+                    let force = (150 - mDist) / 150; let angle = Math.atan2(mdy, mdx);
+                    this.vx -= (Math.cos(angle) * force * 2) + (Math.sin(angle) * force); this.vy -= (Math.sin(angle) * force * 2) - (Math.cos(angle) * force);
+                }
+                this.noiseOffset += 0.01; this.vx += (Math.sin(this.noiseOffset) - 0.5) * 0.2; this.vy += (Math.cos(this.noiseOffset) - 0.5) * 0.2;
+                this.vx *= 0.94; this.vy *= 0.94; this.x += this.vx; this.y += this.vy; this.baseT += 0.005;
+            }
+            draw(ctx) { ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); }
+        }
+        function animateMain(time=0) {
+            mainAnimationId = requestAnimationFrame(animateMain); ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+            ctx.globalCompositeOperation = 'lighter'; heartParticles.forEach(p => { p.update(time); p.draw(ctx); }); ctx.globalCompositeOperation = 'source-over';
+        }
+
+        // --- GEÇİŞ ---
+        function transitionToLetter() {
+            heartText.style.opacity = '0';
+            cancelAnimationFrame(mainAnimationId);
+            const explodeAnim = () => {
+                ctx.clearRect(0,0,mainCanvas.width, mainCanvas.height); ctx.globalCompositeOperation = 'lighter'; let visible = false;
+                heartParticles.forEach(p => {
+                    let dx = p.x - mainCanvas.width/2; let dy = p.y - mainCanvas.height/2; let angle = Math.atan2(dy, dx);
+                    p.x += Math.cos(angle) * 15 * Math.random(); p.y += Math.sin(angle) * 15 * Math.random(); p.size *= 0.95;
+                    p.draw(ctx); if(p.size > 0.1) visible = true;
+                });
+                if(visible) requestAnimationFrame(explodeAnim); else { mainCanvas.style.display = 'none'; showLetter(); }
+            }; explodeAnim();
+        }
+
+        function showLetter() {
+            const letterSec = document.getElementById('letter-section');
+            letterSec.style.display = 'flex';
+            setTimeout(() => letterSec.style.opacity = '1', 100);
+        }
+
+        const envelopeBtn = document.getElementById('envelopeBtn');
+        let isOpened = false;
+        envelopeBtn.addEventListener('click', () => {
+            if (isOpened) return; isOpened = true;
+            envelopeBtn.classList.add('open');
+            setTimeout(() => typeWriter(myMessage, 0), 800);
+            
+            // FOTOĞRAFLARI ÇAĞIR (Mektup açıldıktan 1.5 sn sonra)
+            setTimeout(dropPhotos, 1500);
+        });
+
+        function typeWriter(text, i) {
+            if (i < text.length) {
+                document.getElementById('typewriter-text').innerHTML += text.charAt(i) === '\n' ? '<br>' : text.charAt(i);
+                setTimeout(() => typeWriter(text, i + 1), 60);
+            }
+        }
+    </script>
+</body>
+</html>
